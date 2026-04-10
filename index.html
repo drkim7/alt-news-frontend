@@ -909,8 +909,7 @@ async function fetchFromRss(tabId) {
 
   // 0건이면 fetch 자체는 됐지만 결과 없음 vs 완전 실패를 구분해서 throw
   if (filtered.length === 0 && allItems.length === 0) {
-    throw new Error('RSS_ALL_FAILED: 모든 CORS 프록시가 응답하지 않습니다.
-인터넷 연결을 확인하거나, file:// 경로로 파일을 열어보세요.');
+    throw new Error('RSS_ALL_FAILED: 모든 CORS 프록시가 응답하지 않습니다. 인터넷 연결을 확인하거나 설정에서 API 모드로 변경하세요.');
   }
   return filtered;
 }
