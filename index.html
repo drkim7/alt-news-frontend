@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대체투자 뉴스 브리핑 · 외부망용</title>
+<style>
+  :root {
+    --bg: #081120;
+    --bg-soft: #0d172a;
+    --panel: rgba(13, 23, 42, 0.88);
+    --panel-strong: #101c33;
+    --panel-alt: #13233f;
+    --border: rgba(148, 163, 184, 0.18);
+    --border-strong: rgba(148, 163, 184, 0.28);
+    --accent: #7cc4ff;
+    --accent-strong: #4aa3ff;
+    --accent-soft: rgba(124, 196, 255, 0.14);
+    --gold: #e7c56f;
+    --success: #37c99a;
+    --error: #ff7b7b;
+    --text: #e8eef8;
+    --text-soft: #b5c2d9;
+    --text-mute: #7d8ca7;
+    --tag-bg: rgba(255,255,255,0.05);
+    --shadow: 0 18px 60px rgba(0,0,0,0.28);
+    --radius: 14px;
+    --radius-lg: 22px;
+    --font-head: 'Inter', 'Pretendard', 'Segoe UI', sans-serif;
+    --font-body: 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    --transition: 0.18s ease;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background:
+      radial-gradient(circle at top left, rgba(74,163,255,0.14), transparent 30%),
+      radial-gradient(circle at top right, rgba(55,201,154,0.12), transparent 28%),
+      linear-gradient(180deg, #081120 0%, #0a1323 100%);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  a { color: inherit; }
+
+  .header {
+    background: rgba(8, 17, 32, 0.78);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display:flex; align-items:center; gap:14px; }
+  .logo-mark {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 13px; font-weight: 800; color: #07111f;
+    box-shadow: 0 8px 22px rgba(124,196,255,0.24);
+  }
+  .logo-wrap { display:flex; flex-direction:column; gap:2px; }
+  .logo-text { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 11px; color: var(--text-mute); letter-spacing: 0.2px; }
+  .header-right { display:flex; align-items:center; gap:12px; }
+  .status-badge {
+    display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-soft);
+    background: rgba(255,255,255,0.03); border:1px solid var(--border);
+    border-radius:999px; padding:6px 10px;
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--success);
+    box-shadow: 0 0 10px var(--success); animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+  .btn-refresh {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    display:flex; align-items:center; gap:7px;
+  }
+  .btn-refresh:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+  .btn-refresh.loading svg { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .layout { display:flex; height: calc(100vh - 64px); }
+
+  .sidebar {
+    width: 252px;
+    background: rgba(9, 18, 35, 0.78);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding: 18px 14px;
+  }
+  .sidebar::-webkit-scrollbar { width: 5px; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius:999px; }
+  .sidebar-section { margin-bottom: 16px; }
+  .sidebar-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.1px;
+    color: var(--text-mute); padding: 4px 8px 10px;
+  }
+  .tab-btn {
+    display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%;
+    padding: 12px 12px; margin-bottom: 6px; background: transparent; border:1px solid transparent;
+    color: var(--text-soft); font-size: 13px; cursor:pointer; text-align:left; transition: var(--transition);
+    border-radius: 14px;
+  }
+  .tab-btn:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.06);
+    color: var(--text);
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, rgba(124,196,255,0.16), rgba(231,197,111,0.08));
+    border-color: rgba(124,196,255,0.24);
+    color: var(--text);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  .tab-icon {
+    width: 28px; height: 28px; border-radius: 9px; display:flex; align-items:center; justify-content:center;
+    background: rgba(255,255,255,0.05); flex-shrink:0;
+  }
+  .tab-label { flex:1; line-height:1.35; }
+  .tab-count {
+    font-size: 11px; min-width: 30px; text-align:center; border-radius: 999px; padding: 2px 8px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06); color: var(--text-mute);
+  }
+  .tab-btn.active .tab-count {
+    background: rgba(124,196,255,0.14); border-color: rgba(124,196,255,0.18); color: var(--accent);
+  }
+  .sidebar-divider { height:1px; margin: 12px 8px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+
+  .main { flex:1; overflow-y:auto; padding: 20px 22px 28px; }
+  .main::-webkit-scrollbar { width: 8px; }
+  .main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }
+
+  .content-shell { max-width: 1340px; margin: 0 auto; }
+  .hero-panel {
+    background: linear-gradient(135deg, rgba(18,34,61,0.92), rgba(12,24,44,0.92));
+    border: 1px solid rgba(124,196,255,0.18);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-panel::after {
+    content:''; position:absolute; inset: auto -60px -60px auto; width:220px; height:220px;
+    background: radial-gradient(circle, rgba(124,196,255,0.18), transparent 65%);
+    pointer-events:none;
+  }
+  .hero-top { display:flex; justify-content:space-between; gap:18px; align-items:flex-start; }
+  .hero-copy { max-width: 760px; }
+  .eyebrow {
+    display:inline-flex; align-items:center; gap:8px; padding: 6px 10px; border-radius:999px;
+    border: 1px solid rgba(124,196,255,0.18); background: rgba(124,196,255,0.08);
+    color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase;
+  }
+  .content-title { margin-top: 12px; font-size: 30px; line-height:1.15; font-weight: 750; letter-spacing: -0.8px; }
+  .content-subtitle { margin-top: 10px; font-size: 14px; color: var(--text-soft); max-width: 720px; }
+  .hero-meta { display:flex; flex-wrap:wrap; gap:10px; margin-top: 16px; }
+  .meta-pill {
+    display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding: 7px 11px;
+    background: rgba(255,255,255,0.045); border:1px solid var(--border); color: var(--text-soft); font-size: 12px;
+  }
+  .hero-actions { display:flex; align-items:center; gap:10px; margin-top: 18px; }
+
+  .metrics-grid {
+    margin-top: 18px;
+    display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px;
+  }
+  .metric-card {
+    background: rgba(255,255,255,0.045);
+    border: 1px solid var(--border);
+    border-radius: 18px; padding: 14px 16px;
+  }
+  .metric-label { font-size: 11px; color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.8px; }
+  .metric-value { margin-top: 8px; font-size: 24px; font-weight: 760; letter-spacing: -0.5px; }
+  .metric-note { margin-top: 4px; font-size: 12px; color: var(--text-soft); }
+
+  .filter-bar {
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    margin-top: 18px; padding: 0 4px;
+  }
+  .filter-left, .filter-right { display:flex; align-items:center; gap: 10px; flex-wrap:wrap; }
+  .filter-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.9px; color: var(--text-mute); }
+  .filter-btn {
+    background: rgba(255,255,255,0.04); border:1px solid var(--border); color: var(--text-soft);
+    border-radius: 999px; padding: 7px 13px; font-size: 12px; cursor:pointer; transition: var(--transition);
+  }
+  .filter-btn:hover { border-color: rgba(124,196,255,0.24); color: var(--text); }
+  .filter-btn.active {
+    background: linear-gradient(135deg, rgba(124,196,255,0.18), rgba(124,196,255,0.08));
+    border-color: rgba(124,196,255,0.24); color: var(--accent); font-weight: 700;
+  }
+
+  .inline-alert {
+    margin-top: 16px; padding: 12px 14px; border-radius: 14px;
+    background: rgba(255,123,123,0.08); border:1px solid rgba(255,123,123,0.16); color: #ffbab5; font-size: 12px;
+  }
+
+  .story-layout {
+    display:grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr); gap: 16px; margin-top: 18px;
+  }
+  .lead-story {
+    background: linear-gradient(180deg, rgba(19,35,63,0.92), rgba(12,25,46,0.92));
+    border:1px solid var(--border-strong); border-radius: 22px; padding: 22px; position:relative; overflow:hidden;
+    min-height: 280px;
+  }
+  .lead-story::before {
+    content:''; position:absolute; inset:0 auto auto 0; width: 100%; height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+  }
+  .lead-kicker { display:flex; justify-content:space-between; gap:10px; align-items:center; }
+  .lead-label {
+    display:inline-flex; align-items:center; gap:8px; font-size: 11px; letter-spacing: 0.8px; text-transform: uppercase;
+    color: var(--gold); font-weight:700;
+  }
+  .lead-title { margin-top: 16px; font-size: 28px; line-height: 1.24; font-weight: 760; letter-spacing: -0.9px; }
+  .lead-desc { margin-top: 14px; font-size: 14px; color: var(--text-soft); max-width: 92%; }
+  .lead-footer { margin-top: 18px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+
+  .lead-side { display:grid; gap: 14px; }
+  .signal-card, .source-card, .news-card, .settings-card, .state-box, .skeleton-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+  }
+  .signal-card, .source-card { padding: 18px; }
+  .panel-title { font-size: 13px; font-weight: 700; letter-spacing: -0.2px; }
+  .panel-sub { margin-top: 4px; font-size: 12px; color: var(--text-mute); }
+  .signal-list { margin-top: 14px; display:grid; gap: 10px; }
+  .signal-item {
+    display:flex; align-items:flex-start; gap:10px; padding: 10px 12px; border-radius: 14px;
+    background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04);
+  }
+  .signal-rank {
+    width: 24px; height: 24px; border-radius: 50%; background: rgba(124,196,255,0.12);
+    display:flex; align-items:center; justify-content:center; font-size: 11px; color: var(--accent); font-weight:700; flex-shrink:0;
+  }
+  .signal-item a { text-decoration:none; font-size: 13px; color: var(--text); line-height:1.4; }
+  .signal-item a:hover { color: var(--accent); }
+  .signal-meta { margin-top: 4px; font-size: 11px; color: var(--text-mute); }
+
+  .source-list { margin-top: 14px; display:grid; gap: 10px; }
+  .source-row { display:flex; align-items:center; justify-content:space-between; gap: 12px; }
+  .source-name { font-size: 13px; color: var(--text-soft); }
+  .source-bar { flex:1; height: 6px; background: rgba(255,255,255,0.05); border-radius:999px; overflow:hidden; }
+  .source-bar span { display:block; height:100%; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius:999px; min-width: 4px; }
+  .source-count { font-size: 12px; color: var(--text); min-width: 28px; text-align:right; }
+
+  .section-header {
+    margin-top: 22px; padding: 0 4px; display:flex; align-items:end; justify-content:space-between; gap:12px;
+  }
+  .section-title { font-size: 20px; font-weight: 730; letter-spacing: -0.4px; }
+  .section-desc { margin-top: 4px; font-size: 12px; color: var(--text-mute); }
+
+  .news-grid {
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 14px;
+  }
+  .news-card {
+    padding: 18px; transition: var(--transition); position:relative; overflow:hidden; min-height: 220px;
+    display:flex; flex-direction:column; gap:12px;
+    background: linear-gradient(180deg, rgba(14,24,43,0.92), rgba(10,19,34,0.94));
+  }
+  .news-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(124,196,255,0.8), transparent);
+    opacity: 0; transition: var(--transition);
+  }
+  .news-card:hover { transform: translateY(-3px); border-color: rgba(124,196,255,0.26); }
+  .news-card:hover::before { opacity: 1; }
+  .news-card.featured-small { min-height: 240px; }
+  .card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .card-source-row { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .source-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--accent);
+    background: rgba(124,196,255,0.1); border:1px solid rgba(124,196,255,0.16); border-radius: 999px; padding: 3px 8px;
+  }
+  /* ── 키워드 편집 인풋 ── */
+  .kw-edit-input {
+    width: 100%;
+    background: var(--bg-main, #0f1117);
+    border: 1px solid var(--border, #2a2d36);
+    border-radius: 6px;
+    color: var(--text-main, #e8eaf0);
+    font-size: 12px;
+    padding: 6px 10px;
+    margin-top: 4px;
+    box-sizing: border-box;
+    font-family: inherit;
+    transition: border-color .15s;
+  }
+  .kw-edit-input:focus {
+    outline: none;
+    border-color: var(--accent, #6c8ef5);
+  }
+  .kw-edit-row {
+    display: grid;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .kw-edit-label {
+    font-size: 11px;
+    color: var(--text-mute, #8b8fa8);
+    margin-bottom: 2px;
+  }
+  .kw-section-hint {
+    font-size: 11px;
+    color: var(--text-mute, #8b8fa8);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .keyword-tag {
+    font-size: 10px; color: var(--text-soft); background: var(--tag-bg); border:1px solid rgba(255,255,255,0.05);
+    border-radius: 999px; padding: 3px 8px;
+  }
+  .card-time { font-size: 11px; color: var(--text-mute); white-space:nowrap; }
+  .card-time.fresh { color: var(--success); }
+  .card-time.today { color: var(--gold); }
+  .card-title { font-size: 16px; font-weight: 700; line-height: 1.45; letter-spacing: -0.3px; }
+  .card-title a { text-decoration:none; }
+  .card-title a:hover { color: var(--accent); }
+  .card-desc {
+    font-size: 13px; color: var(--text-soft); line-height: 1.65;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; }
+  .card-link {
+    display:inline-flex; align-items:center; gap:6px; text-decoration:none; font-size: 12px; color: var(--text-soft);
+  }
+  .card-link:hover { color: var(--accent); }
+  .btn-bookmark {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); cursor:pointer;
+    padding: 7px; border-radius: 12px; transition: var(--transition); color: var(--text-mute);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .btn-bookmark:hover, .btn-bookmark.bookmarked { color: var(--gold); border-color: rgba(231,197,111,0.2); }
+  .btn-bookmark svg { width: 14px; height: 14px; }
+
+  .state-box {
+    padding: 52px 24px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; margin-top: 18px;
+  }
+  .state-icon { font-size: 42px; opacity: 0.7; }
+  .state-title { font-size: 18px; font-weight: 700; }
+  .state-desc { font-size: 13px; color: var(--text-soft); text-align:center; line-height:1.7; }
+
+  .skeleton-grid {
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 14px; margin-top: 18px;
+  }
+  .skeleton-card { padding: 18px; }
+  .sk-line {
+    height: 12px; border-radius: 999px; background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.11), rgba(255,255,255,0.05));
+    background-size: 400% 100%; animation: shimmer 1.5s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+
+  .settings-panel { max-width: 980px; margin: 0 auto; display:grid; gap: 16px; }
+  .settings-hero { padding: 24px; border-radius: 22px; background: linear-gradient(135deg, rgba(18,34,61,0.92), rgba(12,24,44,0.92)); border:1px solid rgba(124,196,255,0.18); box-shadow: var(--shadow); }
+  .settings-title { font-size: 28px; font-weight: 760; letter-spacing:-0.7px; }
+  .settings-intro { margin-top: 10px; font-size: 14px; color: var(--text-soft); max-width: 740px; }
+  .settings-grid { display:grid; grid-template-columns: 1.15fr 0.85fr; gap: 16px; }
+  .settings-card { padding: 20px; }
+  .settings-section-label { font-size: 12px; font-weight: 700; color: var(--text-mute); text-transform: uppercase; letter-spacing: 1px; }
+  .settings-row {
+    display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 12px 14px; margin-top: 10px;
+    background: rgba(255,255,255,0.035); border:1px solid var(--border); border-radius: 14px; color: var(--text-soft);
+  }
+  .settings-row.stack { flex-direction:column; align-items:stretch; }
+  .proxy-input {
+    width:100%; background: rgba(255,255,255,0.04); border:1px solid var(--border); border-radius: 14px; padding: 12px 14px;
+    color: var(--text); font-size: 13px; outline:none; transition: var(--transition);
+  }
+  .proxy-input:focus { border-color: rgba(124,196,255,0.32); box-shadow: 0 0 0 3px rgba(124,196,255,0.08); }
+  .proxy-input::placeholder { color: var(--text-mute); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong)); color: #04101d; border:none; border-radius: 999px;
+    padding: 11px 18px; font-size: 13px; font-weight: 800; cursor:pointer; transition: var(--transition);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(74,163,255,0.26); }
+  .btn-danger { background: linear-gradient(135deg, #ff8b8b, #ff6363); color: white; }
+  .info-box {
+    margin-top: 12px; background: rgba(124,196,255,0.08); border:1px solid rgba(124,196,255,0.14); border-radius: 16px; padding: 14px;
+    font-size: 13px; color: var(--text-soft); line-height:1.75;
+  }
+  .info-box strong { color: var(--accent); }
+  .rss-help { font-size: 12px; color: var(--text-mute); line-height: 1.7; margin-top: 10px; }
+  .rss-help code, .info-box code {
+    background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 2px 6px; color: var(--gold);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px;
+  }
+  .mode-selector { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-top: 14px; }
+  .mode-card {
+    padding: 14px; border-radius: 16px; border:1px solid var(--border); background: rgba(255,255,255,0.035); cursor:pointer; transition: var(--transition);
+  }
+  .mode-card:hover { border-color: rgba(124,196,255,0.24); transform: translateY(-1px); }
+  .mode-card.active { background: rgba(124,196,255,0.1); border-color: rgba(124,196,255,0.28); }
+  .mode-card-title { font-size: 13px; font-weight: 700; }
+  .mode-card-desc { margin-top: 4px; font-size: 12px; color: var(--text-mute); line-height:1.55; }
+  .radio-btn {
+    width: 16px; height: 16px; border-radius: 50%; border:1px solid rgba(255,255,255,0.25); display:inline-block; position:relative; flex-shrink:0;
+  }
+  .radio-btn.on { border-color: var(--accent); }
+  .radio-btn.on::after { content:''; position:absolute; inset:3px; border-radius:50%; background: var(--accent); }
+
+  .scroll-top {
+    position: fixed; bottom: 24px; right: 24px; width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(8,17,32,0.92); border: 1px solid var(--border); color: var(--text-soft);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; transition: var(--transition);
+    opacity:0; pointer-events:none; z-index: 60; box-shadow: var(--shadow);
+  }
+  .scroll-top.visible { opacity: 1; pointer-events:auto; }
+  .scroll-top:hover { color: var(--accent); border-color: var(--accent); }
+
+  @media (max-width: 1200px) {
+    .story-layout, .settings-grid { grid-template-columns: 1fr; }
+    .metrics-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width: 860px) {
+    .layout { display:block; height:auto; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .main { padding: 16px; }
+    .content-title { font-size: 24px; }
+    .lead-title, .settings-title { font-size: 22px; }
+    .news-grid, .mode-selector, .metrics-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-mark">AI</div>
+    <div class="logo-wrap">
+      <span class="logo-text">대체투자 뉴스 브리핑</span>
+      <span class="logo-sub">GitHub Pages + Render</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-badge">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">대기 중</span>
+    </div>
+    <button class="btn-refresh" id="btnRefresh" onclick="fetchCurrentTab()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+      새로고침
+    </button>
+  </div>
+</header>
+
+<!-- ===== LAYOUT ===== -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">대체투자</div>
+      <button class="tab-btn active" onclick="switchTab(this, 'alt')" data-tab="alt">
+        <span class="tab-icon">🏗</span>
+        <span class="tab-label">대체투자 종합</span>
+        <span class="tab-count" id="cnt-alt">—</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab(this, 'infra')" data-tab="infra">
+        <span class="tab-icon">🛣</span>
+        <span class="tab-label">인프라 금융</span>
+        <span class="tab-count" id="cnt-infra">—</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab(this, 'fund')" data-tab="fund">
+        <span class="tab-icon">💼</span>
+        <span class="tab-label">사모펀드·PEF</span>
+        <span class="tab-count" id="cnt-fund">—</span>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">부동산 PF</div>
+      <button class="tab-btn" onclick="switchTab(this, 'pf')" data-tab="pf">
+        <span class="tab-icon">🏢</span>
+        <span class="tab-label">부동산 PF 종합</span>
+        <span class="tab-count" id="cnt-pf">—</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab(this, 'reit')" data-tab="reit">
+        <span class="tab-icon">📊</span>
+        <span class="tab-label">리츠·부동산펀드</span>
+        <span class="tab-count" id="cnt-reit">—</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab(this, 'npl')" data-tab="npl">
+        <span class="tab-icon">⚠️</span>
+        <span class="tab-label">부실채권·NPL</span>
+        <span class="tab-count" id="cnt-npl">—</span>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">규제·시장</div>
+      <button class="tab-btn" onclick="switchTab(this, 'policy')" data-tab="policy">
+        <span class="tab-icon">📋</span>
+        <span class="tab-label">금융규제·정책</span>
+        <span class="tab-count" id="cnt-policy">—</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab(this, 'global')" data-tab="global">
+        <span class="tab-icon">🌏</span>
+        <span class="tab-label">글로벌 대체투자</span>
+        <span class="tab-count" id="cnt-global">—</span>
+      </button>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <button class="tab-btn" onclick="switchTab(this, 'bookmarks')" data-tab="bookmarks">
+        <span class="tab-icon">⭐</span>
+        <span class="tab-label">북마크</span>
+        <span class="tab-count" id="cnt-bookmarks">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab(this, 'settings')" data-tab="settings">
+        <span class="tab-icon">⚙️</span>
+        <span class="tab-label">설정</span>
+        <span class="tab-count" style="visibility:hidden">—</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main" id="mainArea">
+    <!-- 동적 렌더링 -->
+  </main>
+</div>
+
+<!-- 스크롤 탑 -->
+<button class="scroll-top" id="scrollTop" onclick="mainArea.scrollTo({top:0,behavior:'smooth'})">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+</button>
+
+
+<script>
+// ============================================================
+// CONFIG: 키워드 탭 정의
+// 백엔드/API에서 그대로 사용 가능한 메타 정보
+// ============================================================
+const TAB_CONFIG = {
+  alt: {
+    label: '대체투자 종합',
+    keywords: ['대체투자', '대체자산', '실물자산'],
+    maxItems: 15,
+    hoursBack: 48
+  },
+  infra: {
+    label: '인프라 금융',
+    keywords: ['인프라펀드', '인프라금융', '사회간접자본', 'SOC투자', 'BTL', 'BTO'],
+    maxItems: 12,
+    hoursBack: 72
+  },
+  fund: {
+    label: '사모펀드·PEF',
+    keywords: ['사모펀드', 'PEF', '경영참여형', 'GP', 'LP', '블라인드펀드'],
+    maxItems: 12,
+    hoursBack: 48
+  },
+  pf: {
+    label: '부동산 PF 종합',
+    keywords: ['부동산PF', '프로젝트파이낸싱', 'PF대출', 'PF리스크'],
+    maxItems: 15,
+    hoursBack: 48
+  },
+  reit: {
+    label: '리츠·부동산펀드',
+    keywords: ['리츠', 'REITs', '부동산펀드', '부동산투자신탁'],
+    maxItems: 12,
+    hoursBack: 72
+  },
+  npl: {
+    label: '부실채권·NPL',
+    keywords: ['NPL', '부실채권', '부실PF', 'PF연체', '워크아웃'],
+    maxItems: 12,
+    hoursBack: 72
+  },
+  policy: {
+    label: '금융규제·정책',
+    keywords: ['금융위원회', '금융감독원', '자본시장법', '금산분리', '생산적금융'],
+    maxItems: 12,
+    hoursBack: 48
+  },
+  global: {
+    label: '글로벌 대체투자',
+    keywords: ['글로벌인프라', '해외대체투자', 'BlackRock', 'Blackstone', '해외부동산'],
+    maxItems: 10,
+    hoursBack: 72
+  }
+};
+
+// ============================================================
+// APP CONFIG
+// mode:
+//  - api  : /api/news?tab=alt 형태의 백엔드 호출
+//  - json : /data/alt.json 형태의 정적 JSON 호출
+//  - demo : 내장 샘플 데이터 표시
+// ============================================================
+const APP_CONFIG = {
+  mode: 'api',
+  apiBaseUrl: 'https://alt-news-backend.onrender.com',
+  jsonBaseUrl: './data',
+  apiPath: '/api/news',
+  autoRefreshMin: 30,
+  requestTimeoutMs: 12000,
+  fallbackToDemoOnError: false,
+};
+
+
+const SAMPLE_DATA = {
+  alt: [
+    {
+      title: '샘플 | 대체투자 시장 모니터링 화면 테스트 기사',
+      link: 'https://example.com/alt-1',
+      desc: '외부망용 샘플 데이터입니다. 실제 운영 시에는 백엔드 API 또는 정적 JSON 파일과 연결하세요.',
+      source: 'sample',
+      keyword: '대체투자',
+      pubDate: new Date().toISOString(),
+      id: 'sample-alt-1'
+    },
+    {
+      title: '샘플 | 실물자산·인프라 투자 동향 점검',
+      link: 'https://example.com/alt-2',
+      desc: '현재는 데모 모드 또는 호출 실패에 따른 샘플 표시 상태입니다.',
+      source: 'sample',
+      keyword: '실물자산',
+      pubDate: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+      id: 'sample-alt-2'
+    }
+  ],
+  infra: [
+    {
+      title: '샘플 | 인프라 금융 프로젝트 구조 분석',
+      link: 'https://example.com/infra-1',
+      desc: '백엔드 API에서 tab=infra 결과를 내려주면 이 탭에 실제 데이터가 표시됩니다.',
+      source: 'sample',
+      keyword: '인프라금융',
+      pubDate: new Date().toISOString(),
+      id: 'sample-infra-1'
+    }
+  ],
+  fund: [
+    {
+      title: '샘플 | 사모펀드·PEF 시장 업데이트',
+      link: 'https://example.com/fund-1',
+      desc: '사모펀드 관련 예시 데이터입니다.',
+      source: 'sample',
+      keyword: 'PEF',
+      pubDate: new Date().toISOString(),
+      id: 'sample-fund-1'
+    }
+  ],
+  pf: [
+    {
+      title: '샘플 | 부동산 PF 리스크 체크',
+      link: 'https://example.com/pf-1',
+      desc: 'PF 탭 연결 예시입니다.',
+      source: 'sample',
+      keyword: '부동산PF',
+      pubDate: new Date().toISOString(),
+      id: 'sample-pf-1'
+    }
+  ],
+  reit: [
+    {
+      title: '샘플 | 리츠·부동산펀드 수익률 비교',
+      link: 'https://example.com/reit-1',
+      desc: '리츠/부동산펀드 탭 연결 예시입니다.',
+      source: 'sample',
+      keyword: '리츠',
+      pubDate: new Date().toISOString(),
+      id: 'sample-reit-1'
+    }
+  ],
+  npl: [
+    {
+      title: '샘플 | 부실채권·NPL 거래 동향',
+      link: 'https://example.com/npl-1',
+      desc: 'NPL 탭 연결 예시입니다.',
+      source: 'sample',
+      keyword: 'NPL',
+      pubDate: new Date().toISOString(),
+      id: 'sample-npl-1'
+    }
+  ],
+  policy: [
+    {
+      title: '샘플 | 금융규제·정책 주요 체크포인트',
+      link: 'https://example.com/policy-1',
+      desc: '정책 탭 연결 예시입니다.',
+      source: 'sample',
+      keyword: '금융위원회',
+      pubDate: new Date().toISOString(),
+      id: 'sample-policy-1'
+    }
+  ],
+  global: [
+    {
+      title: '샘플 | 글로벌 대체투자 동향',
+      link: 'https://example.com/global-1',
+      desc: '해외 대체투자 탭 연결 예시입니다.',
+      source: 'sample',
+      keyword: '해외대체투자',
+      pubDate: new Date().toISOString(),
+      id: 'sample-global-1'
+    }
+  ]
+};
+
+// ============================================================
+// STATE
+// ============================================================
+const STATE = {
+  currentTab: 'alt',
+  cache: {},
+  bookmarks: [],
+  filter: 'all',
+  apiBaseUrl: 'https://alt-news-backend.onrender.com',
+  jsonBaseUrl: './data',
+  mode: 'api',
+  autoRefreshTimer: null,
+};
+
+
+// ============================================================
+// STORAGE
+// ============================================================
+function loadStorage() {
+  try {
+    const bm = localStorage.getItem('ai_bm');
+    if (bm) STATE.bookmarks = JSON.parse(bm);
+
+    const cfg = localStorage.getItem('ai_cfg');
+    if (cfg) {
+      const c = JSON.parse(cfg);
+
+      const isGithubPages = location.hostname.endsWith('github.io');
+      const savedApi = c.apiBaseUrl;
+      const savedMode = c.mode;
+
+      if (c.jsonBaseUrl !== undefined) STATE.jsonBaseUrl = c.jsonBaseUrl;
+
+      if (c.tabKeywords) {
+        Object.entries(c.tabKeywords).forEach(([id, kws]) => {
+          if (TAB_CONFIG[id] && Array.isArray(kws) && kws.length > 0) {
+            TAB_CONFIG[id].keywords = kws;
+          }
+        });
+      }
+
+      if (isGithubPages) {
+        STATE.apiBaseUrl = 'https://alt-news-backend.onrender.com';
+        STATE.mode = 'api';
+        saveConfig();
+      } else {
+        if (savedApi !== undefined) STATE.apiBaseUrl = savedApi;
+        if (savedMode !== undefined) STATE.mode = savedMode;
+      }
+    } else if (location.hostname.endsWith('github.io')) {
+      STATE.apiBaseUrl = 'https://alt-news-backend.onrender.com';
+      STATE.mode = 'api';
+      saveConfig();
+    }
+  } catch(e) {}
+  updateBookmarkCount();
+}
+
+function saveBookmarks() {
+  try { localStorage.setItem('ai_bm', JSON.stringify(STATE.bookmarks)); } catch(e) {}
+  updateBookmarkCount();
+}
+function saveConfig() {
+  try {
+    const tabKeywords = {};
+    Object.entries(TAB_CONFIG).forEach(([id, cfg]) => { tabKeywords[id] = cfg.keywords; });
+    localStorage.setItem('ai_cfg', JSON.stringify({
+      apiBaseUrl: STATE.apiBaseUrl,
+      jsonBaseUrl: STATE.jsonBaseUrl,
+      mode: STATE.mode,
+      tabKeywords,
+    }));
+  } catch(e) {}
+}
+
+
+// ============================================================
+// DATA FETCH HELPERS
+// ============================================================
+function normalizeItem(item, fallbackKeyword = '') {
+  const link = item.link || item.url || '#';
+  const pubDateRaw = item.pubDate || item.publishedAt || item.date || new Date().toISOString();
+  const pubDate = new Date(pubDateRaw);
+  return {
+    title: item.title || '(제목 없음)',
+    link,
+    desc: item.desc || item.description || '',
+    source: item.source || item.publisher || extractDomain(link) || 'unknown',
+    keyword: item.keyword || fallbackKeyword || '',
+    pubDate,
+    id: item.id || makeId(link + '|' + (item.title || '')),
+  };
+}
+
+function makeId(seed) {
+  try {
+    return btoa(unescape(encodeURIComponent(seed))).replace(/=/g, '').substring(0, 24);
+  } catch(e) {
+    return 'id-' + Math.random().toString(36).slice(2, 12);
+  }
+}
+
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('요청 시간 초과')), ms))
+  ]);
+}
+
+async function fetchJson(url) {
+  const res = await withTimeout(fetch(url, { cache: 'no-cache' }), APP_CONFIG.requestTimeoutMs);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function fetchFromApi(tabId) {
+  const cfg = TAB_CONFIG[tabId];
+  const base = (STATE.apiBaseUrl || APP_CONFIG.apiBaseUrl || '').replace(/\/$/, '');
+  const path = APP_CONFIG.apiPath.startsWith('/') ? APP_CONFIG.apiPath : '/' + APP_CONFIG.apiPath;
+  const url = `${base}${path}?tab=${encodeURIComponent(tabId)}&maxItems=${cfg.maxItems}&hoursBack=${cfg.hoursBack}&keywords=${encodeURIComponent(cfg.keywords.join(','))}`;
+  const data = await fetchJson(url);
+  const list = Array.isArray(data) ? data : (data.items || data.news || []);
+  return list.map(i => normalizeItem(i)).sort((a,b) => b.pubDate - a.pubDate);
+}
+
+// ── RSS 모드: 서버 없이 브라우저에서 직접 Google News RSS 수집
+// 단일 키워드에 대해 프록시 목록을 순서대로 시도
+// 단일 프록시 시도 → 성공 시 파싱된 아이템 배열 반환, 실패 시 throw
+async function tryProxy(proxy, rssUrl, perKw) {
+  const proxyUrl = proxy + encodeURIComponent(rssUrl);
+  const res = await withTimeout(fetch(proxyUrl, { cache: 'no-cache' }), APP_CONFIG.requestTimeoutMs);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const text = await res.text();
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(text, 'application/xml');
+  if (xml.querySelector('parsererror')) throw new Error('XML parse error');
+  const items = Array.from(xml.querySelectorAll('item')).slice(0, perKw);
+  if (items.length === 0) throw new Error('empty feed');
+  const results = [];
+  items.forEach(el => {
+    const title = el.querySelector('title')?.textContent?.trim() || '';
+    const link  = el.querySelector('link')?.textContent?.trim() || '';
+    const desc  = (el.querySelector('description')?.textContent || '').replace(/<[^>]*>/g, '').slice(0, 280);
+    const pub   = el.querySelector('pubDate')?.textContent?.trim() || '';
+    const src   = el.querySelector('source')?.textContent?.trim() || 'Google News';
+    if (title && link) results.push({ title, link, desc, source: src, keyword: kw, pubDate: pub, id: makeId(link) });
+  });
+  return results;
+}
+
+// 모든 프록시를 병렬로 동시에 시도 → 제일 먼저 성공한 결과 사용 (Promise.any)
+async function fetchRssForKeyword(kw, perKw) {
+  const rssUrl = APP_CONFIG.googleNewsRss.replace('{query}', encodeURIComponent(kw));
+  const proxies = APP_CONFIG.corsProxies;
+  try {
+    const result = await Promise.any(proxies.map(proxy => tryProxy(proxy, rssUrl, perKw)));
+    console.info('RSS OK [' + kw + ']');
+    return result;
+  } catch(aggErr) {
+    // AggregateError: 모든 프록시 실패
+    console.error('All proxies failed for: ' + kw);
+    return [];
+  }
+}
+
+async function fetchFromRss(tabId) {
+  const cfg = TAB_CONFIG[tabId];
+  const keywords = cfg.keywords;
+  const hoursBack = cfg.hoursBack;
+  const maxItems = cfg.maxItems;
+  const perKw = Math.max(1, Math.ceil(maxItems / keywords.length));
+
+  const results = await Promise.allSettled(keywords.map(kw => fetchRssForKeyword(kw, perKw)));
+
+  const seenLinks = new Set();
+  const allItems = [];
+  results.forEach(r => {
+    if (r.status === 'fulfilled') {
+      r.value.forEach(item => {
+        if (!seenLinks.has(item.link)) {
+          seenLinks.add(item.link);
+          allItems.push(normalizeItem(item));
+        }
+      });
+    }
+  });
+
+  const cutoff = Date.now() - hoursBack * 3600 * 1000;
+  const filtered = allItems
+    .filter(i => i.pubDate && i.pubDate.getTime() > cutoff)
+    .sort((a, b) => b.pubDate - a.pubDate)
+    .slice(0, maxItems * 2);
+
+  // 0건이면 fetch 자체는 됐지만 결과 없음 vs 완전 실패를 구분해서 throw
+  if (filtered.length === 0 && allItems.length === 0) {
+    throw new Error('RSS_ALL_FAILED: 모든 CORS 프록시가 응답하지 않습니다. 인터넷 연결을 확인하거나 설정에서 API 모드로 변경하세요.');
+  }
+  return filtered;
+}
+
+async function fetchFromJson(tabId) {
+  const base = (STATE.jsonBaseUrl || APP_CONFIG.jsonBaseUrl || './data').replace(/\/$/, '');
+  const url = `${base}/${encodeURIComponent(tabId)}.json`;
+  const data = await fetchJson(url);
+  const list = Array.isArray(data) ? data : (data.items || data.news || []);
+  return list.map(i => normalizeItem(i)).sort((a,b) => b.pubDate - a.pubDate);
+}
+
+function fetchDemoData(tabId) {
+  return (SAMPLE_DATA[tabId] || []).map(i => normalizeItem(i));
+}
+
+async function fetchTabData(tabId) {
+  setStatus('불러오는 중…', true);
+
+  let items = [];
+  if (STATE.mode === 'demo') {
+    items = fetchDemoData(tabId);
+    setStatus('데모 데이터 표시', false);
+    return { items, errorMessage: '', modeUsed: 'demo' };
+  }
+
+  try {
+    items = STATE.mode === 'json' ? await fetchFromJson(tabId) : await fetchFromApi(tabId);
+    setStatus(`${items.length}건 불러옴`, false);
+    return { items, errorMessage: '', modeUsed: STATE.mode };
+  } catch (e) {
+    if (APP_CONFIG.fallbackToDemoOnError) {
+      items = fetchDemoData(tabId);
+      setStatus('실데이터 연결 실패 · 데모 표시', false);
+      return { items, errorMessage: e.message || '연결 실패', modeUsed: 'demo' };
+    }
+    throw e;
+  }
+}
+
+
+// ============================================================
+// RENDER
+// ============================================================
+const mainArea = document.getElementById('mainArea');
+
+function renderSkeleton() {
+  const grid = `<div class="skeleton-grid">${Array(6).fill(`
+    <div class="skeleton-card">
+      <div class="sk-line" style="width:28%;height:10px"></div>
+      <div class="sk-line" style="width:90%;height:18px;margin-top:16px"></div>
+      <div class="sk-line" style="width:74%;height:18px;margin-top:8px"></div>
+      <div class="sk-line" style="width:96%;height:12px;margin-top:16px"></div>
+      <div class="sk-line" style="width:82%;height:12px;margin-top:8px"></div>
+      <div class="sk-line" style="width:42%;height:12px;margin-top:20px"></div>
+    </div>`).join('')}</div>`;
+  mainArea.innerHTML = `
+    <div class="content-shell">
+      <div class="hero-panel">
+        <div class="hero-top">
+          <div class="hero-copy">
+            <span class="eyebrow">LIVE MONITOR</span>
+            <div class="content-title">${TAB_CONFIG[STATE.currentTab]?.label || ''}</div>
+            <div class="content-subtitle">연결된 데이터 소스를 기준으로 최신 기사와 핵심 시그널을 불러오고 있습니다.</div>
+          </div>
+        </div>
+      </div>
+      ${grid}
+    </div>`;
+}
+
+function renderNews(tabId, items) {
+  const cfg = TAB_CONFIG[tabId];
+  const now = Date.now();
+
+  let filtered = items;
+  if (STATE.filter === '24h') filtered = items.filter(i => now - i.pubDate < 86400000);
+  if (STATE.filter === 'today') {
+    const today = new Date(); today.setHours(0,0,0,0);
+    filtered = items.filter(i => i.pubDate >= today);
+  }
+
+  document.getElementById(`cnt-${tabId}`).textContent = filtered.length;
+
+  const fetchedAt = STATE.cache[tabId]?.fetchedAt;
+  const timeStr = fetchedAt ? formatTime(fetchedAt) : '—';
+  const cachedMode = STATE.cache[tabId]?.modeUsed || STATE.mode;
+  const modeLabel = cachedMode === 'api' ? 'API' : cachedMode === 'json' ? 'JSON' : 'DEMO';
+  const errorMsg = STATE.cache[tabId]?.errorMessage;
+
+  const hero = buildHeroPanel(cfg, filtered, timeStr, modeLabel);
+
+  if (!filtered.length) {
+    mainArea.innerHTML = `
+      <div class="content-shell">
+        ${hero}
+        ${errorMsg ? `<div class="inline-alert">실데이터 연결 실패: ${escHtml(errorMsg)}</div>` : ''}
+        <div class="state-box">
+          <div class="state-icon">📭</div>
+          <div class="state-title">표시할 데이터가 없습니다</div>
+          <div class="state-desc">API 또는 JSON 응답 구조를 확인하세요.<br>설정 탭에서 연결 방식을 바꿀 수 있습니다.</div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const lead = filtered[0];
+  const highlights = filtered.slice(1, 4);
+  const remainder = filtered.slice(4);
+  const leadLayout = `
+    <div class="story-layout">
+      ${buildLeadStory(lead)}
+      <div class="lead-side">
+        ${buildSignalPanel(highlights)}
+        ${buildSourcePanel(filtered)}
+      </div>
+    </div>`;
+
+  // highlights(2~4위)는 보조 하이라이트 패널에 이미 표시되므로 카드 목록은 5번째부터
+  const gridCards = remainder.map(item => buildCard(item)).join('');
+
+  mainArea.innerHTML = `
+    <div class="content-shell">
+      ${hero}
+      ${errorMsg ? `<div class="inline-alert">실데이터 연결 실패: ${escHtml(errorMsg)} · 샘플 데이터를 표시 중입니다.</div>` : ''}
+      ${leadLayout}
+      <div class="section-header">
+        <div>
+          <div class="section-title">세부 기사 목록</div>
+          <div class="section-desc">최근성, 매체 분포, 키워드를 함께 보면서 빠르게 훑어볼 수 있는 카드형 레이아웃입니다.</div>
+        </div>
+      </div>
+      <div class="news-grid">${gridCards}</div>
+    </div>`;
+}
+
+function buildHeroPanel(cfg, items, timeStr, modeLabel) {
+  const latestHours = countRecent(items, 24);
+  const bookmarksInTab = items.filter(item => STATE.bookmarks.some(b => b.id === item.id)).length;
+  const sourceSummary = summarizeSources(items);
+  const topSource = sourceSummary[0]?.name || '—';
+
+  return `
+    <div class="hero-panel">
+      <div class="hero-top">
+        <div class="hero-copy">
+          <span class="eyebrow">Executive Briefing</span>
+          <div class="content-title">${cfg.label}</div>
+          <div class="content-subtitle">단순 목록형 대신, 먼저 핵심 기사와 매체 분포를 보여주는 브리핑 대시보드 형태로 구성했습니다. 첫 화면에서 기사 수, 최근성, 연결 방식, 주 매체를 같이 확인할 수 있습니다.</div>
+          <div class="hero-meta">
+            <span class="meta-pill">최종 갱신 ${timeStr}</span>
+            <span class="meta-pill">연결 방식 ${modeLabel}</span>
+            <span class="meta-pill">키워드 ${cfg.keywords.join(' · ')}</span>
+          </div>
+        </div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">기사 수</div>
+          <div class="metric-value">${items.length}</div>
+          <div class="metric-note">현재 필터 기준</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">24시간 내 기사</div>
+          <div class="metric-value">${latestHours}</div>
+          <div class="metric-note">빠른 변동 포착용</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">주요 매체</div>
+          <div class="metric-value">${escHtml(topSource)}</div>
+          <div class="metric-note">중복 제거 후 최다 노출</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">북마크 연계</div>
+          <div class="metric-value">${bookmarksInTab}</div>
+          <div class="metric-note">현재 탭 기준 저장 건</div>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-left">
+          <span class="filter-label">기간 필터</span>
+          <button class="filter-btn ${STATE.filter==='all'?'active':''}" onclick="setFilter('all')">전체</button>
+          <button class="filter-btn ${STATE.filter==='24h'?'active':''}" onclick="setFilter('24h')">24시간</button>
+          <button class="filter-btn ${STATE.filter==='today'?'active':''}" onclick="setFilter('today')">오늘</button>
+        </div>
+        <div class="filter-right">
+          <span class="meta-pill">탭 최대 ${cfg.maxItems}건</span>
+          <span class="meta-pill">조회 범위 ${cfg.hoursBack}시간</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function buildLeadStory(item) {
+  const safeTitle = escHtml(item.title);
+  const safeDesc = escHtml(item.desc || '기사 설명이 없는 경우 제목과 매체, 시각 중심으로 빠르게 검토할 수 있습니다.');
+  const safeLink = escHtml(item.link);
+  const safeSrc = escHtml(item.source || 'unknown');
+  const safeKw = escHtml(item.keyword || '키워드 없음');
+  const itemJson = escHtml(JSON.stringify({ id: item.id, title: item.title, link: item.link, source: item.source, pubDate: item.pubDate?.toISOString?.() || '', desc: item.desc, keyword: item.keyword }));
+  const rel = buildRelativeTime(item);
+  const timeLabel = rel.timeStr || formatAbsoluteDate(item.pubDate);
+  const saved = STATE.bookmarks.some(b => b.id === item.id);
+
+  return `
+    <article class="lead-story">
+      <div class="lead-kicker">
+        <span class="lead-label">Top Story · ${safeSrc}</span>
+        <span class="card-time ${rel.timeCls}">${timeLabel}</span>
+      </div>
+      <div class="lead-title"><a href="${safeLink}" target="_blank" rel="noopener" style="text-decoration:none">${safeTitle}</a></div>
+      <div class="lead-desc">${safeDesc}</div>
+      <div class="lead-footer">
+        <span class="source-badge">${safeSrc}</span>
+        <span class="keyword-tag">${safeKw}</span>
+        <span class="meta-pill">발행 ${formatAbsoluteDate(item.pubDate)}</span>
+        <a href="${safeLink}" target="_blank" rel="noopener" class="card-link">원문 보기</a>
+        <button class="btn-bookmark ${saved?'bookmarked':''}" onclick='toggleBookmark(${itemJson})' title="북마크">
+          <svg viewBox="0 0 24 24" fill="${saved?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </button>
+      </div>
+    </article>`;
+}
+
+function buildSignalPanel(items) {
+  if (!items.length) {
+    return `<div class="signal-card"><div class="panel-title">보조 하이라이트</div><div class="panel-sub">추가 기사가 없습니다.</div></div>`;
+  }
+  return `
+    <div class="signal-card">
+      <div class="panel-title">보조 하이라이트</div>
+      <div class="panel-sub">핵심 기사 다음으로 먼저 볼 만한 기사들입니다.</div>
+      <div class="signal-list">
+        ${items.map((item, idx) => {
+          const safeTitle = escHtml(item.title);
+          const safeLink = escHtml(item.link);
+          const safeSrc = escHtml(item.source || 'unknown');
+          const rel = buildRelativeTime(item).timeStr || formatAbsoluteDate(item.pubDate);
+          return `<div class="signal-item">
+              <div class="signal-rank">${idx + 2}</div>
+              <div>
+                <a href="${safeLink}" target="_blank" rel="noopener">${safeTitle}</a>
+                <div class="signal-meta">${safeSrc} · ${rel}</div>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+function buildSourcePanel(items) {
+  const sources = summarizeSources(items).slice(0, 4);
+  return `
+    <div class="source-card">
+      <div class="panel-title">매체 분포</div>
+      <div class="panel-sub">같은 이슈가 특정 매체에 편중되는지 빠르게 점검합니다.</div>
+      <div class="source-list">
+        ${sources.length ? sources.map(source => `
+          <div class="source-row">
+            <div class="source-name">${escHtml(source.name)}</div>
+            <div class="source-bar"><span style="width:${source.ratio}%"></span></div>
+            <div class="source-count">${source.count}</div>
+          </div>`).join('') : `<div class="panel-sub">매체 정보가 없습니다.</div>`}
+      </div>
+    </div>`;
+}
+
+function buildCard(item, featured = false) {
+  const bm = STATE.bookmarks.find(b => b.id === item.id);
+  const bmCls = bm ? 'bookmarked' : '';
+  const rel = buildRelativeTime(item);
+  const safeTitle = escHtml(item.title);
+  const safeDesc  = escHtml(item.desc || '설명 없이 수집된 기사입니다.');
+  const safeLink  = escHtml(item.link);
+  const safeSrc   = escHtml(item.source || 'unknown');
+  const safeKw    = escHtml(item.keyword || '키워드 없음');
+  const itemJson  = escHtml(JSON.stringify({ id: item.id, title: item.title, link: item.link, source: item.source, pubDate: item.pubDate?.toISOString?.() || '', desc: item.desc, keyword: item.keyword }));
+
+  return `
+    <div class="news-card ${featured ? 'featured-small' : ''}" id="card-${item.id}">
+      <div class="card-top">
+        <div class="card-source-row">
+          <span class="source-badge">${safeSrc}</span>
+          <span class="keyword-tag">${safeKw}</span>
+        </div>
+        <span class="card-time ${rel.timeCls}">${rel.timeStr || formatAbsoluteDate(item.pubDate)}</span>
+      </div>
+      <div class="card-title"><a href="${safeLink}" target="_blank" rel="noopener">${safeTitle}</a></div>
+      <div class="card-desc">${safeDesc}</div>
+      <div class="card-footer">
+        <a href="${safeLink}" target="_blank" rel="noopener" class="card-link">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          원문 보기
+        </a>
+        <button class="btn-bookmark ${bmCls}" onclick='toggleBookmark(${itemJson})' title="북마크">
+          <svg viewBox="0 0 24 24" fill="${bm?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </button>
+      </div>
+    </div>`;
+}
+
+function buildRelativeTime(item) {
+  const ageMs = Date.now() - item.pubDate;
+  const ageH = ageMs / 3600000;
+  let timeCls = '', timeStr = '';
+  if (!item.pubDate || isNaN(item.pubDate)) return { timeCls, timeStr };
+  if (ageH < 1) { timeCls = 'fresh'; timeStr = `${Math.max(1, Math.round(ageMs / 60000))}분 전`; }
+  else if (ageH < 6) { timeCls = 'fresh'; timeStr = `${Math.floor(ageH)}시간 전`; }
+  else if (ageH < 24) { timeCls = 'today'; timeStr = `${Math.floor(ageH)}시간 전`; }
+  else { timeStr = `${Math.floor(ageH / 24)}일 전`; }
+  return { timeCls, timeStr };
+}
+
+function countRecent(items, hours) {
+  const now = Date.now();
+  return items.filter(item => item.pubDate && !isNaN(item.pubDate) && (now - item.pubDate) < hours * 3600000).length;
+}
+
+function summarizeSources(items) {
+  if (!items.length) return [];
+  const counts = new Map();
+  items.forEach(item => {
+    const name = item.source || 'unknown';
+    counts.set(name, (counts.get(name) || 0) + 1);
+  });
+  const total = items.length;
+  return [...counts.entries()]
+    .sort((a,b) => b[1] - a[1])
+    .map(([name, count]) => ({ name, count, ratio: Math.round(count / total * 100) }));
+}
+
+function formatAbsoluteDate(date) {
+  if (!date || isNaN(date)) return '시각 정보 없음';
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mi = String(date.getMinutes()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
+}
+
+function renderBookmarks() {
+  document.getElementById('cnt-bookmarks').textContent = STATE.bookmarks.length;
+  const items = STATE.bookmarks.map(item => normalizeItem(item));
+  const hero = `
+    <div class="hero-panel">
+      <div class="hero-copy">
+        <span class="eyebrow">Saved List</span>
+        <div class="content-title">북마크</div>
+        <div class="content-subtitle">검토가 필요한 기사만 따로 모아두는 작업용 뷰입니다. 단순 목록이 아니라 상단 요약과 카드 레이아웃으로 빠르게 재확인할 수 있게 구성했습니다.</div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="metric-label">저장 기사</div><div class="metric-value">${items.length}</div><div class="metric-note">전체 북마크 수</div></div>
+        <div class="metric-card"><div class="metric-label">최근 24시간</div><div class="metric-value">${countRecent(items, 24)}</div><div class="metric-note">최근 저장 기사 추세</div></div>
+        <div class="metric-card"><div class="metric-label">대표 매체</div><div class="metric-value">${escHtml(summarizeSources(items)[0]?.name || '—')}</div><div class="metric-note">북마크 내 비중 최대</div></div>
+        <div class="metric-card"><div class="metric-label">상태</div><div class="metric-value">Manual</div><div class="metric-note">사용자 직접 선별</div></div>
+      </div>
+    </div>`;
+
+  mainArea.innerHTML = `
+    <div class="content-shell">
+      ${hero}
+      ${items.length === 0
+        ? `<div class="state-box">
+             <div class="state-icon">⭐</div>
+             <div class="state-title">북마크가 없습니다</div>
+             <div class="state-desc">기사 카드의 별 버튼을 눌러 저장하세요.</div>
+           </div>`
+        : `<div class="news-grid">${items.map(item => buildCard(item)).join('')}</div>`}
+    </div>`;
+}
+
+function renderSettings() {
+  const apiExample = 'https://your-domain.com';
+  const jsonExample = './data';
+  mainArea.innerHTML = `
+    <div class="content-shell">
+      <div class="settings-panel">
+        <div class="settings-hero">
+          <div class="settings-title">배포 설정</div>
+          <div class="settings-intro">이번 버전은 단순한 폼 나열 대신, 회사 공유용 운영 화면에 맞춰 카드형 설정 레이아웃으로 바꿨습니다. 연결 방식 선택, 주소 입력, 운영 가이드를 한 화면에서 읽기 쉽게 정리했습니다.</div>
+          <div class="hero-meta" style="margin-top:16px">
+            <span class="meta-pill">현재 모드 API</span>
+            <span class="meta-pill">API 기본값 ${escHtml(STATE.apiBaseUrl || '미입력')}</span>
+            <span class="meta-pill">JSON 경로 ${escHtml(STATE.jsonBaseUrl || './data')}</span>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <div style="display:grid; gap:16px;">
+            <div class="settings-card">
+              <div class="settings-section-label">연결 방식 선택</div>
+              <div class="info-box"><strong>권장 방식: API 모드</strong><br>브라우저가 RSS를 직접 수집하지 않고, 외부망 서버가 수집·정제한 결과만 받아오는 운영형 구조입니다.</div>
+              <div class="mode-selector">
+                ${buildModeCard('api', 'API 모드', 'Render 백엔드와 연동')}
+                ${buildModeCard('json', 'JSON 모드', '/data/alt.json 같은 정적 파일 연동')}
+                ${buildModeCard('demo', 'DEMO 모드', '설정 전 화면 점검용 샘플 데이터')}
+              </div>
+            </div>
+            <div class="settings-card">
+              <div class="settings-section-label">연결 주소 입력</div>
+              <div class="settings-row stack">
+                <div style="width:100%">
+                  <div class="panel-sub" style="margin-bottom:8px">API 서버 주소</div>
+                  <input class="proxy-input" id="apiBaseInput" type="text" placeholder="예) ${apiExample}" value="${escHtml(STATE.apiBaseUrl)}">
+                </div>
+                <div style="width:100%">
+                  <div class="panel-sub" style="margin-bottom:8px">정적 JSON 경로</div>
+                  <input class="proxy-input" id="jsonBaseInput" type="text" placeholder="예) ${jsonExample}" value="${escHtml(STATE.jsonBaseUrl)}">
+                </div>
+                <div class="rss-help">GitHub Pages/태블릿에서는 API 모드를 권장합니다.<br>예시 호출: <code>${apiExample}/api/news?tab=alt</code></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid; gap:16px;">
+            <div class="settings-card">
+              <div class="settings-section-label">운영 가이드</div>
+              <div class="settings-row stack">
+                <div>
+                  <div class="panel-title">RSS 모드 (태블릿·개인 PC)</div>
+                  <div class="panel-sub">서버 설치 없이 브라우저에서 직접 Google News RSS를 수집합니다. 외부 인터넷이 필요하며, HTML 파일 하나만 있으면 됩니다.</div>
+                </div>
+                <div>
+                  <div class="panel-title">연결 로직 (API/JSON 모드)</div>
+                  <div class="panel-sub">탭마다 <code>tab</code>, <code>keywords</code>, <code>maxItems</code>, <code>hoursBack</code> 값을 넘길 수 있습니다.</div>
+                </div>
+                <div>
+                  <div class="panel-title">권장 UX</div>
+                  <div class="panel-sub">GitHub Pages/태블릿: API 모드 / 화면 테스트: DEMO 모드</div>
+                </div>
+                <div>
+                  <div class="panel-title">캐시 초기화</div>
+                  <div class="panel-sub">설정 저장 시 기존 탭 캐시를 비우고 새로 연결합니다.</div>
+                </div>
+              </div>
+            </div>
+            <div class="settings-card">
+              <div class="settings-section-label">탭별 검색 키워드 편집</div>
+              <div class="kw-section-hint">쉼표(,)로 구분해서 입력하세요. 저장 버튼을 누르면 즉시 반영됩니다.<br>예: 대체투자, 대체자산, 실물자산</div>
+              <div class="kw-edit-row">
+                ${Object.entries(TAB_CONFIG).map(([id, cfg]) => `
+                  <div>
+                    <div class="kw-edit-label">${cfg.label}</div>
+                    <input class="kw-edit-input" id="kw_${id}" type="text" value="${escHtml(cfg.keywords.join(', '))}" placeholder="키워드1, 키워드2, ...">
+                  </div>`).join('')}
+              </div>
+            </div>
+            <div class="settings-card">
+              <div class="settings-section-label">저장 및 관리</div>
+              <div class="info-box" style="margin-bottom:12px;font-size:11px">
+                💡 <strong>태블릿에서 설정이 유지 안 될 때:</strong> 파일 앱 대신 Chrome 주소창에서
+                직접 열거나, 파일을 길게 눌러 <strong>"Chrome으로 열기"</strong>를 선택하세요.
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+                <button class="btn-primary" onclick="saveConnectionConfig()">설정 저장 및 캐시 초기화</button>
+                <button class="btn-primary btn-danger" onclick="clearBookmarks()">북마크 전체 삭제</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function buildModeCard(mode, title, desc) {
+  return `<div class="mode-card ${STATE.mode===mode?'active':''}" onclick="setMode('${mode}')">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div class="mode-card-title">${title}</div>
+      <div class="radio-btn ${STATE.mode===mode?'on':''}"></div>
+    </div>
+    <div class="mode-card-desc">${desc}</div>
+  </div>`;
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+function escHtml(s) {
+  if (typeof s !== 'string') return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  STATE.currentTab = tabId;
+  STATE.filter = 'all';
+
+  if (tabId === 'bookmarks') { renderBookmarks(); return; }
+  if (tabId === 'settings')  { renderSettings();  return; }
+
+  if (STATE.cache[tabId]) {
+    renderNews(tabId, STATE.cache[tabId].items);
+  } else {
+    fetchCurrentTab();
+  }
+}
+
+async function fetchCurrentTab() {
+  const tabId = STATE.currentTab;
+  if (tabId === 'bookmarks' || tabId === 'settings') return;
+
+  const btn = document.getElementById('btnRefresh');
+  btn.classList.add('loading');
+  renderSkeleton();
+
+  try {
+    const result = await fetchTabData(tabId);
+    STATE.cache[tabId] = {
+      items: result.items,
+      fetchedAt: new Date(),
+      errorMessage: result.errorMessage || '',
+      modeUsed: result.modeUsed || STATE.mode
+    };
+    renderNews(tabId, result.items);
+  } catch(e) {
+    mainArea.innerHTML = `<div class="state-box">
+      <div class="state-icon">⚠️</div>
+      <div class="state-title">불러오기 실패</div>
+      <div class="state-desc">API/JSON 서버에 접근할 수 없습니다.<br>설정 탭에서 서버 주소와 연결 방식을 확인하세요.<br><br><small style="color:var(--text-mute)">${escHtml(e.message)}</small><br><br><small style="color:var(--text-mute)">Render 무료 플랜은 첫 요청 시 30~60초 정도 걸릴 수 있습니다. 잠시 후 새로고침해 보세요.</small></div>
+    </div>`;
+    setStatus('불러오기 실패', false);
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+
+function setFilter(f) {
+  STATE.filter = f;
+  const tabId = STATE.currentTab;
+  if (STATE.cache[tabId]) renderNews(tabId, STATE.cache[tabId].items);
+}
+
+function toggleBookmark(item) {
+  const idx = STATE.bookmarks.findIndex(b => b.id === item.id);
+  if (idx >= 0) {
+    STATE.bookmarks.splice(idx, 1);
+  } else {
+    STATE.bookmarks.unshift(item);
+  }
+  saveBookmarks();
+
+  const card = document.getElementById(`card-${item.id}`);
+  if (card) {
+    const btn = card.querySelector('.btn-bookmark');
+    const bm = STATE.bookmarks.find(b => b.id === item.id);
+    btn.classList.toggle('bookmarked', !!bm);
+    btn.querySelector('svg').setAttribute('fill', bm ? 'currentColor' : 'none');
+  }
+  if (STATE.currentTab === 'bookmarks') renderBookmarks();
+}
+
+function updateBookmarkCount() {
+  document.getElementById('cnt-bookmarks').textContent = STATE.bookmarks.length;
+}
+
+function clearBookmarks() {
+  if (confirm('북마크를 모두 삭제하시겠습니까?')) {
+    STATE.bookmarks = [];
+    saveBookmarks();
+    if (STATE.currentTab === 'bookmarks') renderBookmarks();
+  }
+}
+
+function setMode(mode) {
+  if (location.hostname.endsWith('github.io') && mode === 'rss') {
+    mode = 'api';
+  }
+  STATE.mode = mode;
+  saveConfig();
+  resetCache();
+  renderSettings();
+  if (STATE.currentTab !== 'settings' && STATE.currentTab !== 'bookmarks') {
+    fetchCurrentTab();
+  }
+}
+
+
+function resetCache() {
+  Object.keys(STATE.cache).forEach(k => delete STATE.cache[k]);
+}
+
+function saveConnectionConfig() {
+  const apiInput = document.getElementById('apiBaseInput');
+  const jsonInput = document.getElementById('jsonBaseInput');
+  if (apiInput) STATE.apiBaseUrl = apiInput.value.trim();
+  if (jsonInput) STATE.jsonBaseUrl = jsonInput.value.trim() || './data';
+  // 키워드 인풋에서 TAB_CONFIG 업데이트
+  Object.keys(TAB_CONFIG).forEach(id => {
+    const inp = document.getElementById('kw_' + id);
+    if (inp) {
+      const kws = inp.value.split(',').map(s => s.trim()).filter(Boolean);
+      if (kws.length > 0) TAB_CONFIG[id].keywords = kws;
+    }
+  });
+  saveConfig();
+  resetCache();
+  alert('저장되었습니다. 현재 탭을 새로고침하면 반영됩니다.');
+}
+
+function setStatus(msg, loading) {
+  document.getElementById('statusText').textContent = msg;
+  const dot = document.getElementById('statusDot');
+  dot.style.background = loading ? 'var(--accent)' : 'var(--success)';
+  dot.style.boxShadow  = loading ? '0 0 6px var(--accent)' : '0 0 6px var(--success)';
+}
+
+function formatTime(date) {
+  if (!date) return '—';
+  const h = String(date.getHours()).padStart(2,'0');
+  const m = String(date.getMinutes()).padStart(2,'0');
+  const mon = date.getMonth()+1;
+  const d = date.getDate();
+  return `${mon}/${d} ${h}:${m}`;
+}
+
+function extractDomain(url) {
+  try { return new URL(url).hostname.replace('www.',''); } catch(e) { return ''; }
+}
+
+function startAutoRefresh() {
+  if (STATE.autoRefreshTimer) clearInterval(STATE.autoRefreshTimer);
+  const mins = APP_CONFIG.autoRefreshMin;
+  if (!mins) return;
+  STATE.autoRefreshTimer = setInterval(() => {
+    if (STATE.currentTab !== 'bookmarks' && STATE.currentTab !== 'settings') {
+      fetchCurrentTab();
+    }
+  }, mins * 60 * 1000);
+}
+
+document.getElementById('mainArea').addEventListener('scroll', function() {
+  const btn = document.getElementById('scrollTop');
+  btn.classList.toggle('visible', this.scrollTop > 300);
+});
+
+(function init() {
+  loadStorage();
+  fetchCurrentTab();
+  startAutoRefresh();
+})();
+</script>
+
+</body>
+</html>
