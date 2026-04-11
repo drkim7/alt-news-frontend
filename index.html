@@ -538,6 +538,18 @@
     padding: 9px 18px; font-size: 13px; cursor: pointer; transition:.15s;
   }
   .btn-close-modal:hover { border-color: var(--text-mute); color: var(--text); }
+
+  /* ── 메모/라벨 ── */
+  .btn-note { background:transparent; border:none; cursor:pointer; font-size:13px; padding:2px 4px; opacity:.45; transition:opacity .15s; }
+  .btn-note:hover, .btn-note.has-note { opacity:1; }
+  .card-note { display:flex; align-items:center; gap:6px; padding:4px 0 2px; flex-wrap:wrap; }
+  .note-label-badge { background:rgba(108,142,245,.18); color:var(--accent); border:1px solid rgba(108,142,245,.3); border-radius:4px; font-size:10px; padding:1px 7px; font-weight:700; }
+  .note-memo-text { font-size:11px; color:var(--text-mute); font-style:italic; }
+  .note-label-opt { background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--text-mute); font-size:11px; padding:4px 10px; cursor:pointer; transition:.15s; }
+  .note-label-opt:hover { border-color:var(--accent); color:var(--accent); }
+  .note-label-opt.active { border-color:var(--accent); color:var(--accent); background:rgba(108,142,245,.12); font-weight:700; }
+  .briefing-fmt-sel { background:var(--bg-main); border:1px solid var(--border); color:var(--text); border-radius:7px; padding:6px 10px; font-size:12px; cursor:pointer; }
+  .risk-btn-high.active { border-color:#ff6b6b; color:#ff6b6b; background:rgba(239,83,80,.1); }
 </style>
 </head>
 <body>
@@ -639,6 +651,11 @@
   <!-- 브리핑 선택 바 -->
   <div class="briefing-bar hidden" id="briefingBar">
     <span class="briefing-count">선택된 기사 <strong id="selCount">0</strong>건</span>
+    <select class="briefing-fmt-sel" id="briefingFmtSel" onchange="STATE.briefingFormat=this.value;saveConfig()">
+      <option value="report">보고용</option>
+      <option value="meeting">회의용</option>
+      <option value="messenger">메신저용</option>
+    </select>
     <button class="btn-briefing" onclick="openBriefing()">📋 브리핑 생성</button>
     <button class="btn-clear-sel" onclick="clearSelection()">선택 해제</button>
   </div>
@@ -655,6 +672,29 @@
     </div>
   </div>
 
+  <!-- 메모/라벨 모달 -->
+  <div class="briefing-modal hidden" id="noteModal" onclick="if(event.target===this)closeNoteModal()">
+    <div class="briefing-box" style="max-width:420px">
+      <h3>💬 기사 메모</h3>
+      <div id="noteTitlePreview" style="font-size:12px;color:var(--text-mute);margin-bottom:14px;line-height:1.5"></div>
+      <div style="margin-bottom:12px">
+        <div class="panel-sub" style="margin-bottom:6px">라벨 선택</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="noteLabelBtns">
+          <button class="note-label-opt" onclick="selectNoteLabel(this)" data-label="심사참고">심사참고</button> <button class="note-label-opt" onclick="selectNoteLabel(this)" data-label="사후관리">사후관리</button> <button class="note-label-opt" onclick="selectNoteLabel(this)" data-label="정책체크">정책체크</button> <button class="note-label-opt" onclick="selectNoteLabel(this)" data-label="시장동향">시장동향</button> <button class="note-label-opt" onclick="selectNoteLabel(this)" data-label="위원회보고">위원회보고</button>
+          <button class="note-label-opt" onclick="selectNoteLabel(this)" data-label="">없음</button>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div class="panel-sub" style="margin-bottom:6px">메모</div>
+        <textarea id="noteMemoInput" class="proxy-input" rows="3" placeholder="간단한 메모를 입력하세요" style="resize:vertical"></textarea>
+      </div>
+      <div class="briefing-actions">
+        <button class="btn-copy" onclick="saveNote()">저장</button>
+        <button class="btn-copy" style="background:#ef5350" onclick="deleteNote()">삭제</button>
+        <button class="btn-close-modal" onclick="closeNoteModal()">닫기</button>
+      </div>
+    </div>
+  </div>
   <!-- MAIN -->
   <main class="main" id="mainArea">
     <!-- 동적 렌더링 -->
@@ -676,48 +716,56 @@ const TAB_CONFIG = {
   alt: {
     label: '대체투자 종합',
     keywords: ['대체투자', '대체자산', '실물자산'],
+    excludeKeywords: [],
     maxItems: 15,
     hoursBack: 48
   },
   infra: {
     label: '인프라 금융',
     keywords: ['인프라펀드', '인프라금융', '사회간접자본', 'SOC투자', 'BTL', 'BTO'],
-    maxItems: 12,
-    hoursBack: 72
+    excludeKeywords: [],
+        maxItems: 12,
+        hoursBack: 72
   },
   fund: {
     label: '사모펀드·PEF',
     keywords: ['사모펀드', 'PEF', '경영참여형', 'GP', 'LP', '블라인드펀드'],
-    maxItems: 12,
-    hoursBack: 48
+    excludeKeywords: [],
+        maxItems: 12,
+        hoursBack: 48
   },
   pf: {
     label: '부동산 PF 종합',
     keywords: ['부동산PF', '프로젝트파이낸싱', 'PF대출', 'PF리스크'],
-    maxItems: 15,
-    hoursBack: 48
+    excludeKeywords: [],
+        maxItems: 15,
+        hoursBack: 48
   },
   reit: {
     label: '리츠·부동산펀드',
     keywords: ['리츠', 'REITs', '부동산펀드', '부동산투자신탁'],
-    maxItems: 12,
-    hoursBack: 72
+    excludeKeywords: [],
+        maxItems: 12,
+        hoursBack: 72
   },
   npl: {
     label: '부실채권·NPL',
     keywords: ['NPL', '부실채권', '부실PF', 'PF연체', '워크아웃'],
-    maxItems: 12,
-    hoursBack: 72
+    excludeKeywords: [],
+        maxItems: 12,
+        hoursBack: 72
   },
   policy: {
     label: '금융규제·정책',
     keywords: ['금융위원회', '금융감독원', '자본시장법', '금산분리', '생산적금융'],
-    maxItems: 12,
-    hoursBack: 48
+    excludeKeywords: [],
+        maxItems: 12,
+        hoursBack: 48
   },
   global: {
     label: '글로벌 대체투자',
     keywords: ['글로벌인프라', '해외대체투자', 'BlackRock', 'Blackstone', '해외부동산'],
+    excludeKeywords: [],
     maxItems: 10,
     hoursBack: 72
   }
@@ -852,9 +900,12 @@ const STATE = {
   apiBaseUrl: 'https://alt-news-backend.onrender.com',
   jsonBaseUrl: './data',
   mode: 'api',
-  sort: 'priority',       // 'latest' | 'priority'
-  selectedArticles: [],   // 브리핑용 선택 기사 id 목록
-  lastSeenAt: {},         // tabId → timestamp (NEW 배지용)
+  sort: 'priority',         // 'latest' | 'priority'
+  riskFilter: 'all',        // 'all' | 'high' | 'policy' | 'pf'
+  briefingFormat: 'report', // 'messenger' | 'report' | 'meeting'
+  selectedArticles: [],     // 브리핑용 선택 기사 id 목록
+  articleNotes: {},         // articleId → { memo, label }
+  lastSeenAt: {},           // tabId → timestamp (NEW 배지용)
   autoRefreshTimer: null,
 };
 
@@ -879,11 +930,15 @@ function loadStorage() {
 
       if (c.tabKeywords) {
         Object.entries(c.tabKeywords).forEach(([id, kws]) => {
-          if (TAB_CONFIG[id] && Array.isArray(kws) && kws.length > 0) {
-            TAB_CONFIG[id].keywords = kws;
-          }
+          if (TAB_CONFIG[id] && Array.isArray(kws) && kws.length > 0) TAB_CONFIG[id].keywords = kws;
         });
       }
+      if (c.tabExclude) {
+        Object.entries(c.tabExclude).forEach(([id, kws]) => {
+          if (TAB_CONFIG[id]) TAB_CONFIG[id].excludeKeywords = Array.isArray(kws) ? kws : [];
+        });
+      }
+      if (c.briefingFormat) STATE.briefingFormat = c.briefingFormat;
 
       if (isGithubPages) {
         STATE.apiBaseUrl = 'https://alt-news-backend.onrender.com';
@@ -910,11 +965,15 @@ function saveConfig() {
   try {
     const tabKeywords = {};
     Object.entries(TAB_CONFIG).forEach(([id, cfg]) => { tabKeywords[id] = cfg.keywords; });
+    const tabExclude = {};
+    Object.entries(TAB_CONFIG).forEach(([id, cfg]) => { tabExclude[id] = cfg.excludeKeywords || []; });
     localStorage.setItem('ai_cfg', JSON.stringify({
       apiBaseUrl: STATE.apiBaseUrl,
       jsonBaseUrl: STATE.jsonBaseUrl,
       mode: STATE.mode,
       tabKeywords,
+      tabExclude,
+      briefingFormat: STATE.briefingFormat,
     }));
   } catch(e) {}
 }
@@ -1005,6 +1064,16 @@ function markLastSeen(tabId, items) {
   try { localStorage.setItem('ai_lastseen', JSON.stringify(STATE.lastSeenAt)); } catch(e) {}
 }
 
+function loadArticleNotes() {
+  try {
+    const v = localStorage.getItem('ai_notes');
+    if (v) STATE.articleNotes = JSON.parse(v);
+  } catch(e) {}
+}
+function saveArticleNotes() {
+  try { localStorage.setItem('ai_notes', JSON.stringify(STATE.articleNotes)); } catch(e) {}
+}
+
 function loadLastSeen() {
   try {
     const v = localStorage.getItem('ai_lastseen');
@@ -1015,21 +1084,94 @@ function loadLastSeen() {
 // ============================================================
 // BRIEFING GENERATION
 // ============================================================
-function generateBriefing(articles) {
+function generateBriefing(articles, fmt) {
+  const format = fmt || STATE.briefingFormat || 'report';
   const now = new Date();
   const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  let text = `[대체투자 뉴스 브리핑] ${dateStr}\n`;
-  text += '─'.repeat(40) + '\n\n';
-  articles.forEach((item, i) => {
-    const risk = item.riskLevel === 'high' ? ' 🔴 고위험' : item.riskLevel === 'medium' ? ' 🟠 주의' : item.riskTags?.includes('policy') ? ' 🔵 정책' : '';
-    text += `${i + 1}. ${item.title}${risk}\n`;
-    text += `   매체: ${item.source || '불명'} · 키워드: ${item.keyword || '—'}\n`;
-    if (item.desc) text += `   요약: ${item.desc.slice(0, 80)}${item.desc.length > 80 ? '…' : ''}\n`;
-    text += `   링크: ${item.link}\n\n`;
-  });
-  text += '─'.repeat(40) + '\n';
-  text += `총 ${articles.length}건 선택 · 생성: ${now.toLocaleTimeString('ko-KR')}`;
-  return text;
+  const timeStr = now.toLocaleTimeString('ko-KR');
+
+  function riskLabel(item) {
+    if (item.riskLevel === 'high') return ' 🔴';
+    if (item.riskLevel === 'medium') return ' 🟠';
+    if (item.riskTags?.includes('policy')) return ' 🔵';
+    return '';
+  }
+  function noteStr(item) {
+    const n = STATE.articleNotes[item.id];
+    if (!n) return '';
+    return n.label ? ` [${n.label}]` : '';
+  }
+  function memoStr(item) {
+    const n = STATE.articleNotes[item.id];
+    return (n && n.memo) ? `   💬 메모: ${n.memo}\n` : '';
+  }
+
+  if (format === 'messenger') {
+    // 짧게, 제목 중심, 링크 마지막
+    let t = `📰 대체투자 뉴스 ${dateStr}\n`;
+    articles.forEach((item, i) => {
+      t += `${i+1}. ${item.title}${riskLabel(item)}${noteStr(item)}\n`;
+      t += memoStr(item);
+    });
+    t += '\n🔗 링크\n';
+    articles.forEach((item, i) => { t += `${i+1}. ${item.link}\n`; });
+    return t;
+  }
+
+  if (format === 'meeting') {
+    // 번호형, 매체/키워드/링크 포함
+    let t = `[대체투자 뉴스 브리핑] ${dateStr}\n`;
+    t += '='.repeat(44) + '\n\n';
+    articles.forEach((item, i) => {
+      t += `${i+1}. ${item.title}${riskLabel(item)}${noteStr(item)}\n`;
+      t += `   ▪ 매체: ${item.source || '—'}  ▪ 키워드: ${item.keyword || '—'}\n`;
+      if (item.desc) t += `   ▪ 내용: ${item.desc.slice(0, 100)}${item.desc.length > 100 ? '…' : ''}\n`;
+      t += memoStr(item);
+      t += `   ▪ 링크: ${item.link}\n\n`;
+    });
+    t += `총 ${articles.length}건 · ${timeStr} 생성`;
+    return t;
+  }
+
+  // report (기본)
+  const highRisk = articles.filter(i => i.riskLevel === 'high');
+  const policy   = articles.filter(i => i.riskTags?.includes('policy') && i.riskLevel !== 'high');
+  const others   = articles.filter(i => i.riskLevel !== 'high' && !i.riskTags?.includes('policy'));
+
+  let t = `[대체투자 뉴스 브리핑] ${dateStr}\n`;
+  t += '─'.repeat(40) + '\n\n';
+
+  if (highRisk.length) {
+    t += '■ 주요 이슈 (고위험)\n';
+    highRisk.forEach((item, i) => {
+      t += `  ${i+1}. ${item.title}${noteStr(item)}\n`;
+      if (item.desc) t += `     → ${item.desc.slice(0, 90)}…\n`;
+      t += memoStr(item);
+    });
+    t += '\n';
+  }
+  if (policy.length) {
+    t += '■ 정책 동향\n';
+    policy.forEach((item, i) => {
+      t += `  ${i+1}. ${item.title}${noteStr(item)}\n`;
+      t += memoStr(item);
+    });
+    t += '\n';
+  }
+  if (others.length) {
+    t += '■ 참고 기사\n';
+    others.forEach((item, i) => {
+      t += `  ${i+1}. ${item.title}${noteStr(item)}\n`;
+      t += memoStr(item);
+    });
+    t += '\n';
+  }
+
+  t += '■ 참고 링크\n';
+  articles.forEach((item, i) => { t += `  ${i+1}. [${item.source || '—'}] ${item.link}\n`; });
+  t += '\n' + '─'.repeat(40) + '\n';
+  t += `총 ${articles.length}건 선택 · ${timeStr} 생성`;
+  return t;
 }
 
 function makeId(seed) {
@@ -1212,12 +1354,23 @@ function renderNews(tabId, items) {
   // 리스크 태깅 + 중요도 점수 부여
   const enriched = enrichItems(items);
 
-  let filtered = enriched;
-  if (STATE.filter === '24h') filtered = enriched.filter(i => now - i.pubDate < 86400000);
+  // 제외 키워드 필터
+  const excludeKws = (TAB_CONFIG[tabId]?.excludeKeywords || []).map(k => k.toLowerCase().trim()).filter(Boolean);
+  let filtered = excludeKws.length
+    ? enriched.filter(i => !excludeKws.some(k => (i.title + ' ' + (i.desc || '')).toLowerCase().includes(k)))
+    : enriched;
+
+  // 기간 필터
+  if (STATE.filter === '24h') filtered = filtered.filter(i => now - i.pubDate < 86400000);
   if (STATE.filter === 'today') {
     const today = new Date(); today.setHours(0,0,0,0);
-    filtered = enriched.filter(i => i.pubDate >= today);
+    filtered = filtered.filter(i => i.pubDate >= today);
   }
+
+  // 리스크 필터
+  if (STATE.riskFilter === 'high')   filtered = filtered.filter(i => i.riskLevel === 'high');
+  if (STATE.riskFilter === 'policy') filtered = filtered.filter(i => i.riskTags?.includes('policy'));
+  if (STATE.riskFilter === 'pf')     filtered = filtered.filter(i => /pf|프로젝트파이낸싱|부동산pf/i.test(i.title + (i.keyword || '')));
 
   // 정렬 적용
   filtered = sortItems(filtered, STATE.sort);
@@ -1331,6 +1484,11 @@ function buildHeroPanel(cfg, items, timeStr, modeLabel) {
           <button class="filter-btn ${STATE.filter==='all'?'active':''}" onclick="setFilter('all')">전체</button>
           <button class="filter-btn ${STATE.filter==='24h'?'active':''}" onclick="setFilter('24h')">24시간</button>
           <button class="filter-btn ${STATE.filter==='today'?'active':''}" onclick="setFilter('today')">오늘</button>
+          <span style="margin:0 4px;color:var(--border)">│</span>
+          <button class="filter-btn ${STATE.riskFilter==='all'?'active':''}" onclick="setRiskFilter('all')">전체위험</button>
+          <button class="filter-btn risk-btn-high ${STATE.riskFilter==='high'?'active':''}" onclick="setRiskFilter('high')">🔴 고위험</button>
+          <button class="filter-btn ${STATE.riskFilter==='policy'?'active':''}" onclick="setRiskFilter('policy')">📋 정책</button>
+          <button class="filter-btn ${STATE.riskFilter==='pf'?'active':''}" onclick="setRiskFilter('pf')">PF리스크</button>
         </div>
         <div class="filter-right">
           <span class="meta-pill">탭 최대 ${cfg.maxItems}건</span>
@@ -1427,6 +1585,7 @@ function buildCard(item, featured = false) {
   const riskBadges = buildRiskBadges(item);
   const isNew = isNewArticle(STATE.currentTab, item);
   const isSelected = STATE.selectedArticles.some(a => a.id === item.id);
+  const note = STATE.articleNotes[item.id] || null;
 
   return `
     <div class="news-card ${featured ? 'featured-small' : ''} ${item.riskLevel === 'high' ? 'risk-card-high' : ''}" id="card-${item.id}">
@@ -1444,11 +1603,13 @@ function buildCard(item, featured = false) {
           </div>
           <div class="card-title"><a href="${safeLink}" target="_blank" rel="noopener">${safeTitle}</a></div>
           <div class="card-desc">${safeDesc}</div>
+          ${note ? `<div class="card-note"><span class="note-label-badge">${escHtml(note.label||'')}</span>${note.memo ? `<span class="note-memo-text">${escHtml(note.memo)}</span>` : ''}</div>` : ''}
           <div class="card-footer">
             <a href="${safeLink}" target="_blank" rel="noopener" class="card-link">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               원문 보기
             </a>
+            <button class="btn-note ${note?'has-note':''}" onclick='openNoteModal(${itemJson})' title="메모">💬</button>
             <button class="btn-bookmark ${bmCls}" onclick='toggleBookmark(${itemJson})' title="북마크">
               <svg viewBox="0 0 24 24" fill="${bm?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             </button>
@@ -1603,7 +1764,16 @@ function renderSettings() {
                 ${Object.entries(TAB_CONFIG).map(([id, cfg]) => `
                   <div>
                     <div class="kw-edit-label">${cfg.label}</div>
-                    <input class="kw-edit-input" id="kw_${id}" type="text" value="${escHtml(cfg.keywords.join(', '))}" placeholder="키워드1, 키워드2, ...">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
+                      <div>
+                        <div style="font-size:10px;color:var(--text-mute);margin-bottom:2px">포함 키워드</div>
+                        <input class="kw-edit-input" id="kw_${id}" type="text" value="${escHtml(cfg.keywords.join(', '))}" placeholder="키워드1, 키워드2">
+                      </div>
+                      <div>
+                        <div style="font-size:10px;color:#ff6b6b;margin-bottom:2px">제외 키워드</div>
+                        <input class="kw-edit-input" id="kw_ex_${id}" type="text" value="${escHtml((cfg.excludeKeywords||[]).join(', '))}" placeholder="제외1, 제외2" style="border-color:rgba(239,83,80,.3)">
+                      </div>
+                    </div>
                   </div>`).join('')}
               </div>
             </div>
@@ -1688,6 +1858,12 @@ async function fetchCurrentTab() {
 }
 
 
+function setRiskFilter(f) {
+  STATE.riskFilter = f;
+  const tabId = STATE.currentTab;
+  if (STATE.cache[tabId]) renderNews(tabId, STATE.cache[tabId].items);
+}
+
 function setFilter(f) {
   STATE.filter = f;
   const tabId = STATE.currentTab;
@@ -1767,6 +1943,9 @@ function updateBriefingBar() {
   const n = STATE.selectedArticles.length;
   cnt.textContent = n;
   bar.classList.toggle('hidden', n === 0);
+  // 포맷 셀렉트 동기화
+  const sel = document.getElementById('briefingFmtSel');
+  if (sel) sel.value = STATE.briefingFormat || 'report';
 }
 
 function openBriefing() {
@@ -1795,6 +1974,52 @@ function copyBriefing() {
   });
 }
 
+// ── 기사 메모/라벨 ──
+let _noteTargetItem = null;
+
+function openNoteModal(item) {
+  _noteTargetItem = item;
+  const existing = STATE.articleNotes[item.id] || {};
+  document.getElementById('noteTitlePreview').textContent = item.title || '';
+  document.getElementById('noteMemoInput').value = existing.memo || '';
+  document.querySelectorAll('.note-label-opt').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.label === (existing.label || ''));
+  });
+  document.getElementById('noteModal').classList.remove('hidden');
+}
+
+function closeNoteModal() {
+  document.getElementById('noteModal').classList.add('hidden');
+  _noteTargetItem = null;
+}
+
+function selectNoteLabel(btn) {
+  document.querySelectorAll('.note-label-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function saveNote() {
+  if (!_noteTargetItem) return;
+  const memo = document.getElementById('noteMemoInput').value.trim();
+  const activeLabel = document.querySelector('.note-label-opt.active');
+  const label = activeLabel ? activeLabel.dataset.label : '';
+  STATE.articleNotes[_noteTargetItem.id] = { memo, label };
+  saveArticleNotes();
+  closeNoteModal();
+  const tabId = STATE.currentTab;
+  if (STATE.cache[tabId]) renderNews(tabId, STATE.cache[tabId].items);
+}
+
+function deleteNote() {
+  if (!_noteTargetItem) return;
+  delete STATE.articleNotes[_noteTargetItem.id];
+  saveArticleNotes();
+  closeNoteModal();
+  const tabId = STATE.currentTab;
+  if (STATE.cache[tabId]) renderNews(tabId, STATE.cache[tabId].items);
+}
+
+
 function resetCache() {
   Object.keys(STATE.cache).forEach(k => delete STATE.cache[k]);
 }
@@ -1811,6 +2036,8 @@ function saveConnectionConfig() {
       const kws = inp.value.split(',').map(s => s.trim()).filter(Boolean);
       if (kws.length > 0) TAB_CONFIG[id].keywords = kws;
     }
+    const exInp = document.getElementById('kw_ex_' + id);
+    if (exInp) TAB_CONFIG[id].excludeKeywords = exInp.value.split(',').map(s => s.trim()).filter(Boolean);
   });
   saveConfig();
   resetCache();
@@ -1856,6 +2083,7 @@ document.getElementById('mainArea').addEventListener('scroll', function() {
 (function init() {
   loadStorage();
   loadLastSeen();
+  loadArticleNotes();
   fetchCurrentTab();
   startAutoRefresh();
 })();
